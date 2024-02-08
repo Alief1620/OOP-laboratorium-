@@ -1,165 +1,98 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace Laboratorium_3
+public class MyList<T>
 {
-    class Person
+    private class Node
     {
-        private string FirstName { get; set; }
-        private string LastName { get; set; }
-        private int Age { get; set; }
+        public T Data { get; set; }
+        public Node Next { get; set; }
 
-        public Person(string firstName, string lastName, int age)
+        public Node(T data)
         {
-            FirstName = firstName;
-            LastName = lastName;
-            Age = age;
-        }
-
-        public virtual void View()
-        {
-            Console.WriteLine($"Person: {FirstName} {LastName}, Age: {Age}");
-        }
-
-        public string GetFirstName() => FirstName;
-        public string GetLastName() => LastName;
-        public int GetAge() => Age;
-    }
-
-    class Book
-    {
-        protected string Title { get; set; }
-        protected Person Author { get; set; }
-        protected DateTime ReleaseDate { get; set; }
-
-        public Book(string title, Person author, DateTime releaseDate)
-        {
-            Title = title;
-            Author = author;
-            ReleaseDate = releaseDate;
-        }
-
-        public string GetTitle() => Title;
-
-        public virtual void View()
-        {
-            Console.WriteLine($"Book: {Title}, Author: {Author.GetFirstName()} {Author.GetLastName()}, Release Date: {ReleaseDate.ToShortDateString()}");
+            Data = data;
+            Next = null;
         }
     }
 
-    class AdventureBook : Book
+    private Node head;
+    private int count; // Dodane pole count
+
+    public void Add(T data)
     {
-        public string Setting { get; set; }
+        Node newNode = new Node(data);
 
-        public AdventureBook(string title, Person author, DateTime releaseDate, string setting)
-            : base(title, author, releaseDate)
+        if (head == null)
         {
-            Setting = setting;
+            head = newNode;
         }
-
-        public override void View()
+        else
         {
-            base.View();
-            Console.WriteLine($"Setting: {Setting}");
-        }
-    }
-
-    class DocumentaryBook : Book
-    {
-        public string Topic { get; set; }
-
-        public DocumentaryBook(string title, Person author, DateTime releaseDate, string topic)
-            : base(title, author, releaseDate)
-        {
-            Topic = topic;
-        }
-
-        public override void View()
-        {
-            base.View();
-            Console.WriteLine($"Topic: {Topic}");
-        }
-    }
-
-    class Reader : Person
-    {
-        protected List<Book> ReadBooks { get; set; }
-
-        public Reader(string firstName, string lastName, int age) : base(firstName, lastName, age)
-        {
-            ReadBooks = new List<Book>();
-        }
-
-        public void AddBook(Book book)
-        {
-            ReadBooks.Add(book);
-        }
-
-        public override void View()
-        {
-            Console.WriteLine($"Person: {GetFirstName()} {GetLastName()}, Age: {GetAge()}");
-            ViewBooks();
-        }
-
-        private void ViewBooks()
-        {
-            Console.WriteLine($"Books read by {GetFirstName()} {GetLastName()}:");
-            foreach (var book in ReadBooks)
+            Node current = head;
+            while (current.Next != null)
             {
-                book.View();
+                current = current.Next;
             }
-            Console.WriteLine();
+
+            current.Next = newNode;
         }
+
+        count++; // Zwiększ licznik po dodaniu elementu
     }
 
-    class Reviewer : Reader
+    public int Count // Dodana właściwość Count
     {
-        private Random random;
+        get { return count; }
+    }
 
-        public Reviewer(string firstName, string lastName, int age) : base(firstName, lastName, age)
+    public T this[int index]
+    {
+        get
         {
-            random = new Random();
-        }
-
-        public void PrintReviews()
-        {
-            Console.WriteLine($"Reviews by {GetFirstName()} {GetLastName()}:");
-            foreach (var book in ReadBooks)
+            if (index < 0)
             {
-                int rating = random.Next(1, 6); 
-                Console.WriteLine($"{book.GetTitle()} - Rating: {rating}");
+                throw new IndexOutOfRangeException("Index cannot be negative");
             }
-            Console.WriteLine();
-        }
-    }
 
-    class Program
-    {
-        static void Main()
-        {
-            AdventureBook adventureBook = new AdventureBook("Journey to the Center of the Earth", new Person("Jules", "Verne", 40), new DateTime(1864, 11, 25), "Underground");
-            DocumentaryBook documentaryBook = new DocumentaryBook("The Elegant Universe", new Person("Brian", "Greene", 55), new DateTime(1999, 10, 15), "Physics");
+            Node current = head;
+            for (int i = 0; i < index; i++)
+            {
+                if (current == null)
+                {
+                    throw new IndexOutOfRangeException("Index out of range");
+                }
 
+                current = current.Next;
+            }
 
-            Reader reader = new Reader("Alice", "Johnson", 28);
+            if (current == null)
+            {
+                throw new IndexOutOfRangeException("Index out of range");
+            }
 
-            reader.AddBook(adventureBook);
-            reader.AddBook(documentaryBook);
-
-            reader.View();
-
-            Reviewer reviewer = new Reviewer("Sophia", "Jones", 27);
-
-            reviewer.AddBook(adventureBook);
-            reviewer.AddBook(documentaryBook);
-
-            reviewer.View();
-            reviewer.PrintReviews();
+            return current.Data;
         }
     }
 }
 
-        
+class Program
+{
+    static void Main()
+    {
+        MyList<int> myList = new MyList<int>();
+        myList.Add(1);
+        myList.Add(2);
+        myList.Add(3);
+        myList.Add(4);
+        myList.Add(5);
 
-
+        Console.WriteLine("List of even numbers:");
+        for (int i = 0; i < myList.Count; i++)
+        {
+            if (myList[i] % 2 == 0)
+            {
+                Console.WriteLine(myList[i]);
+            }
+        }
+    }
+}
 
